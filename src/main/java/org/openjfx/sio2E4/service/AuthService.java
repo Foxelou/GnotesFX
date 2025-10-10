@@ -16,43 +16,50 @@ public class AuthService {
 
 	// Méthode de login qui récupère toutes les informations de l'utilisateur
 	public static boolean login(String email, String password) {
-		try {
-			// Construire la requête HTTP
-			HttpClient client = HttpClient.newHttpClient();
-			HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/api/auth/login"))
-					.header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers
-							.ofString("{\"email\":\"" + email + "\", \"password\":\"" + password + "\"}"))
-					.build();
+		if (NetworkService.isOnline()) {
+			try {
+				// Construire la requête HTTP
+				HttpClient client = HttpClient.newHttpClient();
+				HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/api/auth/login"))
+						.header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers
+								.ofString("{\"email\":\"" + email + "\", \"password\":\"" + password + "\"}"))
+						.build();
 
-			// Envoyer la requête et obtenir la réponse
-			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+				// Envoyer la requête et obtenir la réponse
+				HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-			if (response.statusCode() == 200) {
-				// Si la réponse est correcte, traiter le JSON
-				String userJson = response.body();
-				ObjectMapper objectMapper = new ObjectMapper();
-				JsonNode rootNode = objectMapper.readTree(userJson);
+				if (response.statusCode() == 200) {
+					// Si la réponse est correcte, traiter le JSON
+					String userJson = response.body();
+					ObjectMapper objectMapper = new ObjectMapper();
+					JsonNode rootNode = objectMapper.readTree(userJson);
 
-				// Extraire les informations
-				String token = rootNode.path("token").asText();
-				int id = rootNode.path("id").asInt();
-				String nom = rootNode.path("nom").asText();
-				String prenom = rootNode.path("prenom").asText();
-				String emailResponse = rootNode.path("email").asText();
-				String role = rootNode.path("role").path("libelle").asText();
-				String adresse = rootNode.path("adresse").asText();
-				String telephone = rootNode.path("telephone").asText();
+					// Extraire les informations
+					String token = rootNode.path("token").asText();
+					int id = rootNode.path("id").asInt();
+					String nom = rootNode.path("nom").asText();
+					String prenom = rootNode.path("prenom").asText();
+					String emailResponse = rootNode.path("email").asText();
+					String role = rootNode.path("role").path("libelle").asText();
+					String adresse = rootNode.path("adresse").asText();
+					String telephone = rootNode.path("telephone").asText();
 
-				// Crée un objet User avec toutes les données reçues
-				currentUser = new LocalUser(token, id, nom, prenom, emailResponse, role, adresse, telephone);
-				sessionToken = token; // Sauvegarde le token pour utilisation future
-				return true; // Authentification réussie
-			} else {
-				return false; // Erreur dans la réponse
+					// Crée un objet User avec toutes les données reçues
+					currentUser = new LocalUser(token, id, nom, prenom, emailResponse, role, adresse, telephone);
+					sessionToken = token; // Sauvegarde le token pour utilisation future
+					return true; // Authentification réussie
+				} else {
+					return false; // Erreur dans la réponse
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false; // En cas d'erreur
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false; // En cas d'erreur
+		} else {
+			// Création d'un user hors connexion pour le test TODO remplacer par une base de donnée local
+			currentUser = new LocalUser("abc", 0, "nom", "prenom", "admin@lycee.local", "ADMIN", "16 Pl. Saint-Sauveur, 35600 Redon", "06 00 00 00 00");
+			sessionToken = "abc"; // Sauvegarde le token pour utilisation future
+			return true;
 		}
 	}
 
@@ -62,6 +69,7 @@ public class AuthService {
 				System.out.println("Aucun token en session, pas de déconnexion nécessaire.");
 				return;
 			}
+			if (!NetworkService.isOnline()) return;
 
 			HttpClient client = HttpClient.newHttpClient();
 			HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/api/auth/logout"))
