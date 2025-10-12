@@ -8,6 +8,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class AuthService {
 
@@ -56,10 +58,27 @@ public class AuthService {
 				return false; // En cas d'erreur
 			}
 		} else {
-			// Création d'un user hors connexion pour le test TODO remplacer par une base de donnée local
-			currentUser = new LocalUser("abc", 0, "nom", "prenom", "admin@lycee.local", "ADMIN", "16 Pl. Saint-Sauveur, 35600 Redon", "06 00 00 00 00");
-			sessionToken = "abc"; // Sauvegarde le token pour utilisation future
-			return true;
+			ArrayList<LocalUser> localUsers = LocalStorageService.loadLocalUsers();
+            if (localUsers.isEmpty()) {
+				// Création d'un user hors connexion pour le test TODO a supprimer
+				System.out.println("Création d'un user hors connexion pour le test");
+				currentUser = new LocalUser("abc", 0, "nom", "prenom", "admin@lycee.local", "ADMIN", "16 Pl. Saint-Sauveur, 35600 Redon", "06 00 00 00 00");
+				sessionToken = "abc"; // Sauvegarde le token pour utilisation future
+				LocalStorageService.save(currentUser);
+				return true;
+			} else {
+				// TODO rajouter un système de vérification du password ( avec des hashes )
+				Optional<LocalUser> localUser = localUsers.stream()
+						.filter(user -> user.getEmail().equalsIgnoreCase(email))
+						.findFirst();
+				if (localUser.isPresent()) {
+					System.out.println("User trouvé dans le fichier json");
+					currentUser = localUser.get();
+					sessionToken = "abc";
+					return true;
+				}
+				return false;
+			}
 		}
 	}
 

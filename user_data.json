@@ -1,0 +1,29 @@
+{
+  "Etudiant" : [ ],
+  "LocalUser" : [ {
+    "token" : "abc",
+    "id" : 0,
+    "nom" : "nom",
+    "prenom" : "prenom",
+    "email" : "admin@lycee.local",
+    "role" : "ADMIN",
+    "adresse" : "16 Pl. Saint-Sauveur, 35600 Redon",
+    "telephone" : "06 00 00 00 00"
+  } ],
+  "Matiere" : [ ],
+  "Note" : [ ],
+  "NoteType" : [ ],
+  "Role" : [ ],
+  "User" : [ {
+    "id" : 0,
+    "nom" : "test",
+    "prenom" : "test",
+    "email" : "test",
+    "adresse" : "test",
+    "telephone" : "test",
+    "role" : {
+      "id" : 3,
+      "libelle" : "ETUDIANT"
+    }
+  } ]
+}
