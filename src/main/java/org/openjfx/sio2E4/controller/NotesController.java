@@ -4,45 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
-
-import org.openjfx.sio2E4.model.LocalUser;
-import org.openjfx.sio2E4.model.Matiere;
-import org.openjfx.sio2E4.model.Note;
-import org.openjfx.sio2E4.model.NoteType;
-import org.openjfx.sio2E4.model.User;
+import javafx.scene.layout.VBox;
+import org.openjfx.sio2E4.model.*;
+import org.openjfx.sio2E4.service.AuthService;
+import org.openjfx.sio2E4.service.LocalStorageService;
+import org.openjfx.sio2E4.service.NetworkService;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import javafx.scene.control.ListCell;
-import org.openjfx.sio2E4.service.AuthService;
-import org.openjfx.sio2E4.service.LocalStorageService;
-import org.openjfx.sio2E4.service.NetworkService;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NotesController {
 
@@ -228,109 +207,109 @@ public class NotesController {
 	private Label meilleurEleveLabel; // Le Label qui affichera l'élève avec la meilleure moyenne
 
 	private void eleveAvecMeilleureMoyenne(List<Note> notes) {
-		// Map pour stocker les totaux des valeurs pondérées et des coefficients par élève
-		Map<Integer, Double> totalNotes = new HashMap<>();
-		Map<Integer, Double> totalCoefficients = new HashMap<>();
+	    // Map pour stocker les totaux des valeurs pondérées et des coefficients par élève
+	    Map<Integer, Double> totalNotes = new HashMap<>();
+	    Map<Integer, Double> totalCoefficients = new HashMap<>();
 
-		// Parcours des notes pour calculer les totaux
-		for (Note note : notes) {
-			int eleveId = note.getEleve().getId();
-			double valeur = note.getValeur();
-			double coefficient = note.getCoefficient();
+	    // Parcours des notes pour calculer les totaux
+	    for (Note note : notes) {
+	        int eleveId = note.getEleve().getId();
+	        double valeur = note.getValeur();
+	        double coefficient = note.getCoefficient();
 
-			// Ajoute la valeur pondérée à l'élève
-			totalNotes.put(eleveId, totalNotes.getOrDefault(eleveId, 0.0) + (valeur * coefficient));
-			totalCoefficients.put(eleveId, totalCoefficients.getOrDefault(eleveId, 0.0) + coefficient);
-		}
+	        // Ajoute la valeur pondérée à l'élève
+	        totalNotes.put(eleveId, totalNotes.getOrDefault(eleveId, 0.0) + (valeur * coefficient));
+	        totalCoefficients.put(eleveId, totalCoefficients.getOrDefault(eleveId, 0.0) + coefficient);
+	    }
 
-		// Calculer la moyenne pondérée pour chaque élève
-		Map<Integer, Double> moyennes = new HashMap<>();
-		for (int eleveId : totalNotes.keySet()) {
-			double moyenne = totalNotes.get(eleveId) / totalCoefficients.get(eleveId);
-			moyennes.put(eleveId, moyenne);
-		}
+	    // Calculer la moyenne pondérée pour chaque élève
+	    Map<Integer, Double> moyennes = new HashMap<>();
+	    for (int eleveId : totalNotes.keySet()) {
+	        double moyenne = totalNotes.get(eleveId) / totalCoefficients.get(eleveId);
+	        moyennes.put(eleveId, moyenne);
+	    }
 
-		// Trouver l'élève avec la meilleure moyenne
-		int meilleurEleveId = -1;
-		double meilleureMoyenne = -1;
-		for (Map.Entry<Integer, Double> entry : moyennes.entrySet()) {
-			if (entry.getValue() > meilleureMoyenne) {
-				meilleureMoyenne = entry.getValue();
-				meilleurEleveId = entry.getKey();
-			}
-		}
+	    // Trouver l'élève avec la meilleure moyenne
+	    int meilleurEleveId = -1;
+	    double meilleureMoyenne = -1;
+	    for (Map.Entry<Integer, Double> entry : moyennes.entrySet()) {
+	        if (entry.getValue() > meilleureMoyenne) {
+	            meilleureMoyenne = entry.getValue();
+	            meilleurEleveId = entry.getKey();
+	        }
+	    }
 
-		// Trouver l'élève correspondant à l'ID avec la meilleure moyenne
-		User meilleurEleve = null;
-		for (Note note : notes) {
-			if (note.getEleve().getId() == meilleurEleveId) {
-				meilleurEleve = note.getEleve();
-				break;
-			}
-		}
+	    // Trouver l'élève correspondant à l'ID avec la meilleure moyenne
+	    User meilleurEleve = null;
+	    for (Note note : notes) {
+	        if (note.getEleve().getId() == meilleurEleveId) {
+	            meilleurEleve = note.getEleve();
+	            break;
+	        }
+	    }
 
-		// Trouver la date la plus récente parmi les notes
-		Instant dateRecenteInstant = null;
-		DateTimeFormatter formatterAffichage = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	    // Trouver la date la plus récente parmi les notes
+	    Instant dateRecenteInstant = null;
+	    DateTimeFormatter formatterAffichage = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-		for (Note note : notes) {
-			String dateStr = note.getDate();
+	    for (Note note : notes) {
+	        String dateStr = note.getDate();
 
-			try {
-				Instant instantNote;
+	        try {
+	            Instant instantNote;
 
-				if (dateStr.contains("T")) {
-					// Cas avec date + heure + offset, ex: "2025-05-23T12:26:22.884+00:00"
-					instantNote = OffsetDateTime.parse(dateStr).toInstant();
-				} else {
-					// Cas avec date seule, ex: "2024-03-17"
-					LocalDate ld = LocalDate.parse(dateStr);
-					instantNote = ld.atStartOfDay(ZoneId.systemDefault()).toInstant();
-				}
+	            if (dateStr.contains("T")) {
+	                // Cas avec date + heure + offset, ex: "2025-05-23T12:26:22.884+00:00"
+	                instantNote = OffsetDateTime.parse(dateStr).toInstant();
+	            } else {
+	                // Cas avec date seule, ex: "2024-03-17"
+	                LocalDate ld = LocalDate.parse(dateStr);
+	                instantNote = ld.atStartOfDay(ZoneId.systemDefault()).toInstant();
+	            }
 
-				if (dateRecenteInstant == null || instantNote.isAfter(dateRecenteInstant)) {
-					dateRecenteInstant = instantNote;
-				}
-			} catch (DateTimeParseException e) {
-				System.err.println("Erreur de parsing date : " + dateStr);
-			}
-		}
+	            if (dateRecenteInstant == null || instantNote.isAfter(dateRecenteInstant)) {
+	                dateRecenteInstant = instantNote;
+	            }
+	        } catch (DateTimeParseException e) {
+	            System.err.println("Erreur de parsing date : " + dateStr);
+	        }
+	    }
 
-		// Mettre à jour le Label avec l'élève ayant la meilleure moyenne et la date la plus récente
-		if (meilleurEleve != null) {
-			String texte = "Major de promotion : " + meilleurEleve.getPrenom() + " " + meilleurEleve.getNom()
-					+ " avec une moyenne de " + String.format("%.2f", meilleureMoyenne);
+	    // Mettre à jour le Label avec l'élève ayant la meilleure moyenne et la date la plus récente
+	    if (meilleurEleve != null) {
+	        String texte = "Major de promotion : " + meilleurEleve.getPrenom() + " " + meilleurEleve.getNom()
+	                + " avec une moyenne de " + String.format("%.2f", meilleureMoyenne);
 
-			if (dateRecenteInstant != null) {
-				ZonedDateTime dateRecenteLocal = dateRecenteInstant.atZone(ZoneId.systemDefault());
-				texte += " | Date la plus récente : " + dateRecenteLocal.format(formatterAffichage);
-			}
+	        if (dateRecenteInstant != null) {
+	            ZonedDateTime dateRecenteLocal = dateRecenteInstant.atZone(ZoneId.systemDefault());
+	            texte += " | Date la plus récente : " + dateRecenteLocal.format(formatterAffichage);
+	        }
 
-			final String texteFinal = texte; // variable finale pour la lambda
-			Platform.runLater(() -> meilleurEleveLabel.setText(texteFinal));
-		}
+	        final String texteFinal = texte; // variable finale pour la lambda
+	        Platform.runLater(() -> meilleurEleveLabel.setText(texteFinal));
+	    }
 	}
 
 
 	/* Formulaire de saisie de note */
 	@FXML
-	private javafx.scene.control.TextField valeurField;
+	private TextField valeurField;
 	@FXML
-	private javafx.scene.control.TextField coefficientField;
+	private TextField coefficientField;
 	@FXML
-	private javafx.scene.control.TextArea commentaireField;
+	private TextArea commentaireField;
 
 	@FXML
-	private javafx.scene.control.ComboBox<User> eleveComboBox;
+	private ComboBox<User> eleveComboBox;
 	@FXML
-	private javafx.scene.control.ComboBox<User> enseignantComboBox;
+	private ComboBox<User> enseignantComboBox;
 	@FXML
-	private javafx.scene.control.ComboBox<Matiere> matiereComboBox;
+	private ComboBox<Matiere> matiereComboBox;
 	@FXML
-	private javafx.scene.control.ComboBox<NoteType> noteTypeComboBox;
+	private ComboBox<NoteType> noteTypeComboBox;
 
 	@FXML
-	private javafx.scene.control.DatePicker datePicker;
+	private DatePicker datePicker;
 
 	@FXML
 	private javafx.scene.control.Button ajouterNoteButton;
@@ -393,8 +372,9 @@ public class NotesController {
 			LocalStorageService.save(newNote);
 
 			Platform.runLater(() -> {
-				showAlert(Alert.AlertType.INFORMATION, "Note ajouté en local (mode hors ligne).");
+				showAlert(AlertType.INFORMATION, "Note ajouté en local (mode hors ligne).");
 				fetchNotes();
+				clearForm();
 			});
 		}
 	}
@@ -404,7 +384,7 @@ public class NotesController {
 		Note selectedNote = notesTable.getSelectionModel().getSelectedItem();
 
 		if (selectedNote == null) {
-			showAlert(Alert.AlertType.WARNING, "Veuillez sélectionner une note à supprimer.");
+			showAlert(AlertType.WARNING, "Veuillez sélectionner une note à supprimer.");
 			return;
 		}
 
@@ -413,29 +393,29 @@ public class NotesController {
 
 	private void deleteNote(int noteId) {
 		if(NetworkService.isOnline()) {
-			try {
-				HttpClient client = HttpClient.newHttpClient();
-				HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/api/notes/" + noteId))
-						.header("Authorization", "Bearer " + AuthService.getToken()).DELETE().build();
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/api/notes/" + noteId))
+                        .header("Authorization", "Bearer " + AuthService.getToken()).DELETE().build();
 
-				client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-					if (response.statusCode() == 204) {
-						Platform.runLater(() -> {
-							showAlert(AlertType.INFORMATION, "Note supprimée avec succès.");
-							fetchNotes(); // Méthode pour recharger la liste
-						});
-					} else {
-						Platform.runLater(() -> showAlert(AlertType.ERROR, "Erreur lors de la suppression de la note."));
-					}
-				}).exceptionally(e -> {
-					e.printStackTrace();
-					Platform.runLater(() -> showAlert(AlertType.ERROR, "Erreur réseau : " + e.getMessage()));
-					return null;
-				});
-			} catch (Exception e) {
+                client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
+                    if (response.statusCode() == 204) {
+                        Platform.runLater(() -> {
+                            showAlert(AlertType.INFORMATION, "Note supprimée avec succès.");
+                            fetchNotes(); // Méthode pour recharger la liste
+                        });
+                    } else {
+                        Platform.runLater(() -> showAlert(AlertType.ERROR, "Erreur lors de la suppression de la note."));
+                    }
+                }).exceptionally(e -> {
+                    e.printStackTrace();
+                    Platform.runLater(() -> showAlert(AlertType.ERROR, "Erreur réseau : " + e.getMessage()));
+                    return null;
+                });
+            } catch (Exception e) {
 				e.printStackTrace();
-			}
-		} else {
+            }
+        } else {
 			ArrayList<Note> notes = LocalStorageService.loadNotes();
 			Optional<Note> note  = notes.stream()
 					.filter(u -> u.getId()==noteId)
@@ -444,7 +424,7 @@ public class NotesController {
 				LocalStorageService.remove(note.get());
 
 				Platform.runLater(() -> {
-					showAlert(Alert.AlertType.INFORMATION, "Note supprimé en local (mode hors ligne).");
+					showAlert(AlertType.INFORMATION, "Note supprimé en local (mode hors ligne).");
 					fetchNotes();
 				});
 			}
@@ -676,7 +656,7 @@ public class NotesController {
 		Note selectedNote = notesTable.getSelectionModel().getSelectedItem();
 
 		if (selectedNote == null) {
-			showAlert(Alert.AlertType.WARNING, "Veuillez sélectionner une note à modifier.");
+			showAlert(AlertType.WARNING, "Veuillez sélectionner une note à modifier.");
 			return;
 		}
 
@@ -685,7 +665,7 @@ public class NotesController {
 
 		// Empêcher un enseignant de modifier une note qui ne lui appartient pas
 		if ("ENSEIGNANT".equalsIgnoreCase(userRole) && selectedNote.getEnseignant().getId() != currentUser.getId()) {
-			showAlert(Alert.AlertType.ERROR, "Vous ne pouvez modifier que vos propres notes.");
+			showAlert(AlertType.ERROR, "Vous ne pouvez modifier que vos propres notes.");
 			return;
 		}
 
@@ -743,7 +723,7 @@ public class NotesController {
 								eleveBox.getValue().getId(), enseignantBox.getValue().getId(),
 								matiereBox.getValue().getId(), Double.parseDouble(coefficientFieldLocal.getText()),
 								Double.parseDouble(valeurFieldLocal.getText()), noteTypeBox.getValue().getId(),
-								commentaireFieldLocal.getText(), datePickerLocal.getValue().toString());
+									commentaireFieldLocal.getText(), datePickerLocal.getValue().toString());
 
 						HttpClient client = HttpClient.newHttpClient();
 						HttpRequest request = HttpRequest.newBuilder().uri(URI.create(API_URL + "/" + selectedNote.getId()))
@@ -754,25 +734,25 @@ public class NotesController {
 							if (resp.statusCode() == 200) {
 								fetchNotes();
 								Platform.runLater(
-										() -> showAlert(Alert.AlertType.INFORMATION, "Note mise à jour avec succès."));
+										() -> showAlert(AlertType.INFORMATION, "Note mise à jour avec succès."));
 							} else {
 								Platform.runLater(
-										() -> showAlert(Alert.AlertType.ERROR, "Erreur de mise à jour : " + resp.body()));
+										() -> showAlert(AlertType.ERROR, "Erreur de mise à jour : " + resp.body()));
 							}
 						}).exceptionally(e -> {
 							e.printStackTrace();
-							Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Erreur réseau : " + e.getMessage()));
+							Platform.runLater(() -> showAlert(AlertType.ERROR, "Erreur réseau : " + e.getMessage()));
 							return null;
 						});
 
 					} catch (Exception e) {
-						showAlert(Alert.AlertType.ERROR, "Erreur dans le formulaire : " + e.getMessage());
+						showAlert(AlertType.ERROR, "Erreur dans le formulaire : " + e.getMessage());
 						e.printStackTrace();
 					}
 				} else {
 					ArrayList<Note> notes = LocalStorageService.loadNotes();
 					Optional<Note> noteOpt  = notes.stream()
-							.filter(u -> u.getId()==eleveBox.getValue().getId())
+							.filter(n -> n.getId()==selectedNote.getId())
 							.findFirst();
 					if (noteOpt.isPresent()) {
 						Note note = noteOpt.get();
@@ -789,7 +769,7 @@ public class NotesController {
 						LocalStorageService.update(note);
 
 						Platform.runLater(() -> {
-							showAlert(Alert.AlertType.INFORMATION, "Note mis a jour en local (mode hors ligne).");
+							showAlert(AlertType.INFORMATION, "Note mis a jour en local (mode hors ligne).");
 							fetchMatieres(); // Rafraîchit la liste des utilisateurs
 						});
 					}

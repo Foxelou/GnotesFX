@@ -26,7 +26,85 @@
     "id" : 1,
     "libelle" : "Francais"
   } ],
-  "Note" : [ ],
+  "Note" : [ {
+    "id" : 0,
+    "enseignant" : {
+      "id" : 1,
+      "nom" : "Enseignant",
+      "prenom" : "Durand",
+      "email" : "test",
+      "adresse" : "test",
+      "telephone" : "test",
+      "role" : {
+        "id" : 2,
+        "libelle" : "ENSEIGNANT"
+      }
+    },
+    "eleve" : {
+      "id" : 0,
+      "nom" : "Etudiant",
+      "prenom" : "John",
+      "email" : "test",
+      "adresse" : "test",
+      "telephone" : "test",
+      "role" : {
+        "id" : 3,
+        "libelle" : "ETUDIANT"
+      }
+    },
+    "matiere" : {
+      "id" : 1,
+      "libelle" : "Francais"
+    },
+    "coefficient" : 2.0,
+    "valeur" : 20.0,
+    "commentaire" : "test",
+    "date" : "2025-10-25",
+    "modification" : null,
+    "noteType" : {
+      "id" : 0,
+      "libelle" : "ECRIT"
+    }
+  }, {
+    "id" : 1,
+    "enseignant" : {
+      "id" : 1,
+      "nom" : "Enseignant",
+      "prenom" : "Durand",
+      "email" : "test",
+      "adresse" : "test",
+      "telephone" : "test",
+      "role" : {
+        "id" : 2,
+        "libelle" : "ENSEIGNANT"
+      }
+    },
+    "eleve" : {
+      "id" : 0,
+      "nom" : "Etudiant",
+      "prenom" : "John",
+      "email" : "test",
+      "adresse" : "test",
+      "telephone" : "test",
+      "role" : {
+        "id" : 3,
+        "libelle" : "ETUDIANT"
+      }
+    },
+    "matiere" : {
+      "id" : 0,
+      "libelle" : "Math"
+    },
+    "coefficient" : 3.0,
+    "valeur" : 16.0,
+    "commentaire" : "test",
+    "date" : "2025-10-20",
+    "modification" : null,
+    "noteType" : {
+      "id" : 3,
+      "libelle" : "DS"
+    }
+  } ],
   "NoteType" : [ {
     "id" : 0,
     "libelle" : "ECRIT"
@@ -53,7 +131,7 @@
       "libelle" : "ETUDIANT"
     }
   }, {
-    "id" : 0,
+    "id" : 1,
     "nom" : "Enseignant",
     "prenom" : "Durand",
     "email" : "test",

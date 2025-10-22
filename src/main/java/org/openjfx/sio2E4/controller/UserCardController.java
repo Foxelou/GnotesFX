@@ -1,28 +1,28 @@
 package org.openjfx.sio2E4.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import org.openjfx.sio2E4.model.Note;
+import org.openjfx.sio2E4.model.User;
+import org.openjfx.sio2E4.service.AuthService;
+import org.openjfx.sio2E4.service.LocalStorageService;
+import org.openjfx.sio2E4.service.NetworkService;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
-
-import org.openjfx.sio2E4.model.Note;
-import org.openjfx.sio2E4.model.User;
-import org.openjfx.sio2E4.service.AuthService;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javafx.beans.property.SimpleStringProperty;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import org.openjfx.sio2E4.service.LocalStorageService;
-import org.openjfx.sio2E4.service.NetworkService;
+import java.util.stream.Collectors;
 
 public class UserCardController {
 
@@ -74,6 +74,8 @@ public class UserCardController {
                     adresseLabel.setText(user.getAdresse());
                     roleLabel.setText(user.getRole().getLibelle());
                 });
+
+                loadUserNotes(user.getId(), user.getRole().getLibelle());
             } catch (NullPointerException e) {
                 e.printStackTrace();
             }
@@ -107,22 +109,43 @@ public class UserCardController {
     }
 
     private void loadUserNotes(int userId, String role) {
-        HttpClient client = HttpClient.newHttpClient();
-        String urlString = "http://localhost:8080/api/users/" + userId + "/notes";
+        if (NetworkService.isOnline()) {
+            HttpClient client = HttpClient.newHttpClient();
+            String urlString = "http://localhost:8080/api/users/" + userId + "/notes";
 
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(urlString))
-            .header("Authorization", BEARER_TOKEN)
-            .GET()
-            .build();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlString))
+                    .header("Authorization", BEARER_TOKEN)
+                    .GET()
+                    .build();
 
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-            .thenApply(HttpResponse::body)
-            .thenAccept(response -> parseNotesResponse(response, role))
-            .exceptionally(e -> {
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenApply(HttpResponse::body)
+                    .thenAccept(response -> parseNotesResponse(response, role))
+                    .exceptionally(e -> {
+                        e.printStackTrace();
+                        return null;
+                    });
+        } else {
+            ArrayList<Note> notes = LocalStorageService.loadNotes();
+            List<Note> noteList  = notes.stream()
+                    .filter(n -> n.getEleve().getId()==userId)
+                    .collect(Collectors.toList());
+            try {
+                Platform.runLater(() -> {
+                    // Mettre à jour la TableView avec les données
+                    notesTable.getItems().setAll(noteList);
+
+                    // Si l'utilisateur est un étudiant, calculer la moyenne
+                    if ("ETUDIANT".equals(role)) {
+                        double moyenne = calculateMoyenne(noteList);
+                        moyenneLabel.setText("Moyenne: " + moyenne);
+                    }
+                });
+            } catch (NullPointerException e) {
                 e.printStackTrace();
-                return null;
-            });
+            }
+        }
     }
 
     private void parseNotesResponse(String response, String role) {
@@ -168,7 +191,7 @@ public class UserCardController {
     // Initialiser les colonnes de la TableView
     @FXML
     private void initialize() {
-        matiereColumn.setCellValueFactory(cellData -> cellData.getValue().getMatiere() != null ? 
+        matiereColumn.setCellValueFactory(cellData -> cellData.getValue().getMatiere() != null ?
                 new SimpleStringProperty(cellData.getValue().getMatiere().getLibelle()) : null);
 
         valeurColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getValeur()).asObject());
