@@ -109,6 +109,14 @@
                     <!-- Optionnel : pour des logs plus détaillés -->
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
+                    <!-- Propriétés pour TestFX -->
+                    <systemPropertyVariables>
+                        <testfx.robot>glass</testfx.robot>
+                        <testfx.headless>false</testfx.headless>
+                        <prism.order>sw</prism.order>
+                        <prism.text>t2k</prism.text>
+                        <java.awt.headless>false</java.awt.headless>
+                    </systemPropertyVariables>
                 </configuration>
 			</plugin>
         </plugins>
