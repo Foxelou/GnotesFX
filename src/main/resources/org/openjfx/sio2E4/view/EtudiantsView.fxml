@@ -15,4 +15,8 @@
             <TableColumn fx:id="roleColumn" text="Rôle" prefWidth="80"/>
         </columns>
     </TableView>
+    <HBox spacing="10">
+        <Button text="Voir Fiche" onAction="#handleShowEtudiantCard" />
+    </HBox>
+
 </VBox>

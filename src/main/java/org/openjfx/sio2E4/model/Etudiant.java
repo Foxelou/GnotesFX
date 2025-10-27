@@ -14,11 +14,13 @@ public class Etudiant {
     private String telephone;
     private Role role;
 
+
+
     // Inner class pour le rôle
     public static class Role {
         @JsonIgnore // Ignore le champ id lors de la désérialisation
         private Long id;
-        
+
         private String libelle;
 
         @JsonProperty("libelle") // Désérialiser uniquement libelle
@@ -41,7 +43,7 @@ public class Etudiant {
     }
 
     // Getters & Setters pour l'Etudiant
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

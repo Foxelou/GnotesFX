@@ -1,17 +1,16 @@
 package org.openjfx.sio2E4.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
-import javafx.geometry.Insets;
-
 import org.openjfx.sio2E4.model.Role;
 import org.openjfx.sio2E4.model.User;
 import org.openjfx.sio2E4.service.AuthService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openjfx.sio2E4.service.LocalStorageService;
 import org.openjfx.sio2E4.service.NetworkService;
 
@@ -50,7 +49,7 @@ public class UsersController {
 	@FXML
 	private ComboBox<String> roleComboBox;
 
-	
+
 	private void showAlert(AlertType type, String message) {
 		Alert alert = new Alert(type);
 		alert.setTitle("Information");
@@ -68,8 +67,8 @@ public class UsersController {
 		passwordField.clear();
 		roleComboBox.getSelectionModel().selectFirst();
 	}
-	
-	
+
+
 	@FXML
 	public void initialize() {
 		roleComboBox.getItems().addAll("ADMIN", "ENSEIGNANT", "ETUDIANT");
@@ -81,7 +80,7 @@ public class UsersController {
 		adresseColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAdresse()));
 		roleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRole().getLibelle()));
 
-		
+
 		fetchUsers();
 	}
 
@@ -121,18 +120,18 @@ public class UsersController {
 		}
 	}
 
-// -------------------- user Card --------------------
+	// -------------------- user Card --------------------
 	private MainLayoutController mainLayoutController;
 
 	public void setMainLayoutController(MainLayoutController controller) {
-	    this.mainLayoutController = controller;
+		this.mainLayoutController = controller;
 	}
 	@FXML
 	private void handleShowUserCard() {
-	    User selectedUser = usersTable.getSelectionModel().getSelectedItem();
-	    if (selectedUser != null && mainLayoutController != null) {
-	        mainLayoutController.showUserCard(selectedUser.getId());
-	    }
+		User selectedUser = usersTable.getSelectionModel().getSelectedItem();
+		if (selectedUser != null && mainLayoutController != null) {
+			mainLayoutController.showUserCard(selectedUser.getId());
+		}
 	}
 
 	
@@ -168,7 +167,7 @@ public class UsersController {
 		String selectedRole = roleComboBox.getValue();
 		int roleId = getRoleId(selectedRole);
 
-		if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || password.isEmpty()) {
+		if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || password.isEmpty() ) {
 			showAlert(AlertType.WARNING, "Veuillez remplir tous les champs obligatoires.");
 			return;
 		}
@@ -176,6 +175,7 @@ public class UsersController {
 			showAlert(AlertType.WARNING, "Email non conforme.");
 			return;
 		}
+
 		if (!telephone.matches("^(0|\\+33)[1-9](\\d{2}){4}$")) {
 			showAlert(AlertType.WARNING, "Téléphone non conforme.");
 			return;
@@ -234,14 +234,14 @@ public class UsersController {
 
 	private int getRoleId(String roleName) {
 		switch (roleName) {
-		case "ADMIN":
-			return 1;
-		case "ENSEIGNANT":
-			return 2;
-		case "ETUDIANT":
-			return 3;
-		default:
-			return 3;
+			case "ADMIN":
+				return 1;
+			case "ENSEIGNANT":
+				return 2;
+			case "ETUDIANT":
+				return 3;
+			default:
+				return 3;
 		}
 	}
 
