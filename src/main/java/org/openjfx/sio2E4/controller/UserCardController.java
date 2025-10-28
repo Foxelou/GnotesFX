@@ -1,25 +1,5 @@
 package org.openjfx.sio2E4.controller;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
-import org.openjfx.sio2E4.model.MatiereRow;
-import org.openjfx.sio2E4.model.Note;
-import org.openjfx.sio2E4.model.User;
-import org.openjfx.sio2E4.service.AuthService;
-import org.openjfx.sio2E4.service.LocalStorageService;
-import org.openjfx.sio2E4.service.NetworkService;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -29,6 +9,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import org.openjfx.sio2E4.model.MatiereRow;
+import org.openjfx.sio2E4.model.Note;
+import org.openjfx.sio2E4.model.User;
+import org.openjfx.sio2E4.service.AuthService;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.fxml.FXML;
+import org.openjfx.sio2E4.service.LocalStorageService;
+import org.openjfx.sio2E4.service.NetworkService;
 
 public class UserCardController {
 
@@ -50,7 +52,7 @@ public class UserCardController {
     @FXML private TableColumn<MatiereRow, String> appreciationsColumn;
 
     private final String BEARER_TOKEN = "Bearer "+ AuthService.getToken();
-    
+
     public void loadUser(int userId) {
         if (NetworkService.isOnline()) {
             HttpClient client = HttpClient.newHttpClient();
@@ -92,7 +94,7 @@ public class UserCardController {
     private void parseUserResponse(String response) {
         try {
             ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             User user = mapper.readValue(response, User.class);
 
@@ -134,12 +136,15 @@ public class UserCardController {
                         return null;
                     });
         } else {
-            ArrayList<Note> notes = LocalStorageService.loadNotes();
+            ArrayList<Note> notes = (ArrayList<Note>) LocalStorageService.loadNotes().stream()
+                    .filter(note -> note.getEleve().getId() == userId)
+                    .collect(Collectors.toList());
 
             // Regroupe les notes par matière pour n'avoir qu'une seule ligne par matière dans le TableView
             // Utilise un Map<String, List<Note>> où la clé est le nom de la matière et la valeur est la liste des notes
 
             Map<String, List<Note>> notesParMatiere = notes.stream()
+                    .filter(note -> note.getEleve().getId() == userId)
                     .collect(Collectors.groupingBy(n -> n.getMatiere().getLibelle()));
 
             ObservableList<MatiereRow> data = FXCollections.observableArrayList();
@@ -170,9 +175,9 @@ public class UserCardController {
                     // Tooltip pour la date et le type
                     Tooltip tooltip = new Tooltip(
                             note.getCommentaire() +
-                            "\nType: " + note.getNoteType().getLibelle() +
-                            "\nDate: " + note.getDate() +
-                            "\nEnseignant: " + note.getEnseignant().getNom().toUpperCase() + " " + note.getEnseignant().getPrenom()
+                                    "\nType: " + note.getNoteType().getLibelle() +
+                                    "\nDate: " + note.getDate() +
+                                    "\nEnseignant: " + note.getEnseignant().getNom().toUpperCase() + " " + note.getEnseignant().getPrenom()
                     );
                     Tooltip.install(noteContainer, tooltip);
 
@@ -198,7 +203,7 @@ public class UserCardController {
     private void parseNotesResponse(String response, String role) {
         try {
             ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             List<Note> notes = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, Note.class));
 
