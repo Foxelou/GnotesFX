@@ -8,8 +8,8 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class logoutPageController {
-	
-	@FXML
+
+    @FXML
     private Button actiontarget;
 
     @FXML
