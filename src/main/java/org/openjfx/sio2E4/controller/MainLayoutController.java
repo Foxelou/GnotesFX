@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.openjfx.sio2E4.constants.StyleConstants;
 import org.openjfx.sio2E4.model.LocalUser;
 import org.openjfx.sio2E4.service.AuthService;
 
@@ -150,6 +151,7 @@ public class MainLayoutController {
 	}
 
 
+
 	//----------------------- User Card -----------------------
 
 	public void showUserCard(int userId) {
@@ -170,7 +172,10 @@ public class MainLayoutController {
 	}
 
 
-	//----------------------- Etudiants Card -----------------------
+
+
+//----------------------- Etudiants Card -----------------------
+
 
 	@FXML
 	private void showEtudiant() {
@@ -209,6 +214,9 @@ public class MainLayoutController {
 
 
 
+
+
+
 	private void loadView(String fxmlPath) {
 		try {
 			Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
@@ -232,14 +240,15 @@ public class MainLayoutController {
 	@FXML
 	private void onLogoutHover() {
 		if (logoutButton != null) {
-			logoutButton.setStyle("-fx-background-color: #aa2e4a; -fx-text-fill: white;");
+			logoutButton.setStyle(StyleConstants.LOGOUT_BUTTON_HOVER);
 		}
 	}
 
 	@FXML
-	private void onLogoutExit() {
-		logoutButton.setStyle("-fx-background-color: #f0f0f0; -fx-text-fill: #333;");
+	private void onLogoutHoverExit() {
+		logoutButton.setStyle(StyleConstants.LOGOUT_BUTTON_HOVER_EXIT);
 	}
+
 
 
 }
